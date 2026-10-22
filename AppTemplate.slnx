@@ -1,0 +1,80 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug-Unpackaged" />
+    <BuildType Name="Release" />
+    <BuildType Name="Release-Unpackaged" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="AppTemplate/AppTemplate.csproj" DefaultStartup="true">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy Solution="Debug|*" />
+    <Deploy Solution="Release|*" />
+  </Project>
+  <Folder Name="/lib/">
+    <Project Path="lib/AutoDiAttributes/AutoDiAttributes.Generator/AutoDiAttributes.Generator.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+    </Project>
+    <Project Path="lib/AutoDiAttributes/AutoDiAttributes/AutoDiAttributes.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+    </Project>
+    <Project Path="lib/GenJsonConfig/GenJsonConfig.Generators/GenJsonConfig.Generators.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+    </Project>
+    <Project Path="lib/GenJsonConfig/GenJsonConfig/GenJsonConfig.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+    </Project>
+    <Project Path="lib/AppTemplate.Analyzers/AppTemplate.Analyzers.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/SolutionItems/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path=".gitmodules" />
+    <File Path="AGENTS.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="README.md" />
+    <File Path=".github/copilot-instructions.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="AppTemplate.Core.Tests/AppTemplate.Core.Tests.csproj">
+      <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+      <BuildType Solution="Release-Unpackaged|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Project Path="AppTemplate.Composition/AppTemplate.Composition.csproj">
+    <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+    <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+  </Project>
+  <Project Path="AppTemplate.Common/AppTemplate.Common.csproj">
+    <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+    <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+  </Project>
+  <Project Path="AppTemplate.Core/AppTemplate.Core.csproj">
+    <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+    <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+  </Project>
+  <Project Path="AppTemplate.Store/AppTemplate.Store.csproj">
+    <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+    <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+  </Project>
+  <Project Path="AppTemplate.ViewModels/AppTemplate.ViewModels.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <BuildType Solution="Debug-Unpackaged|*" Project="Debug" />
+    <BuildType Solution="Release-Unpackaged|*" Project="Release" />
+  </Project>
+</Solution>

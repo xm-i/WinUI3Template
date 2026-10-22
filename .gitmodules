@@ -1,0 +1,6 @@
+[submodule "lib/AutoDiAttributes"]
+	path = lib/AutoDiAttributes
+	url = https://github.com/xm-i/AutoDiAttributes
+[submodule "lib/GenJsonConfig"]
+	path = lib/GenJsonConfig
+	url = https://github.com/xm-i/GenJsonConfig

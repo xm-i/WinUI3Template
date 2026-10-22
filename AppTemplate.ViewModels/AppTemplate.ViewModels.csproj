@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\lib\AutoDiAttributes\AutoDiAttributes\AutoDiAttributes.csproj" />
+    <ProjectReference Include="..\lib\AutoDiAttributes\AutoDiAttributes.Generator\AutoDiAttributes.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\AppTemplate.Common\AppTemplate.Common.csproj" />
+    <ProjectReference Include="..\AppTemplate.Composition\AppTemplate.Composition.csproj" />
+    <ProjectReference Include="..\AppTemplate.Core\AppTemplate.Core.csproj" />
+    <ProjectReference Include="..\AppTemplate.Store\AppTemplate.Store.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+</Project>

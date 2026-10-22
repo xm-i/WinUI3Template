@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\lib\GenJsonConfig\GenJsonConfig\GenJsonConfig.csproj" />
+    <ProjectReference Include="..\lib\GenJsonConfig\GenJsonConfig.Generators\GenJsonConfig.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\lib\AutoDiAttributes\AutoDiAttributes\AutoDiAttributes.csproj" />
+    <ProjectReference Include="..\lib\AutoDiAttributes\AutoDiAttributes.Generator\AutoDiAttributes.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\AppTemplate.Common\AppTemplate.Common.csproj" />
+    <ProjectReference Include="..\AppTemplate.Composition\AppTemplate.Composition.csproj" />
+    <ProjectReference Include="..\AppTemplate.Core\AppTemplate.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="R3" />
+  </ItemGroup>
+
+</Project>

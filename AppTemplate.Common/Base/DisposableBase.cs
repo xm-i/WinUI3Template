@@ -1,0 +1,212 @@
+using System.Collections.Concurrent;
+using AppTemplate.Composition.Enum;
+using AppTemplate.Composition.Interfaces;
+using AppTemplate.Composition.Objects;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace AppTemplate.Common.Base;
+
+/// <summary>
+/// Dispose可能なオブジェクトの基底クラス。
+/// CompositeDisposableによる一括破棄、DisposeLockによるスレッドセーフなDispose、
+/// OnDisposedによるDispose通知を提供する。
+/// </summary>
+public class DisposableBase : ObservableObject, IDisposableBase {
+#if DEBUG
+	private readonly InstanceTrackingInfo _trackingInfo;
+
+	/// <summary>
+	/// 生成されたインスタンスの追跡情報ディクショナリ（デバッグ用）
+	/// </summary>
+	public static readonly ConcurrentDictionary<Type, ConcurrentDictionary<InstanceTrackingInfo, byte>> CreatedInstances = [];
+
+	/// <summary>
+	/// 生成順にソートされた生成中インスタンスの追跡情報コレクション（デバッグ用）
+	/// </summary>
+	public static IEnumerable<InstanceTrackingInfo> SortedCreatedInstances {
+		get {
+			return CreatedInstances.Values.SelectMany(dict => dict.Keys).OrderBy(info => info.CreationOrder);
+		}
+	}
+#endif
+	/// <summary>
+	/// Dispose用Lockオブジェクト。
+	/// 処理を行っている途中でDisposeされると困る場合、このオブジェクトでロックする。
+	/// </summary>
+	protected readonly DisposableLock DisposeLock = new(LockRecursionPolicy.SupportsRecursion);
+
+	/// <summary>
+	/// Dispose通知用Subject
+	/// </summary>
+	private readonly Subject<Unit> _onDisposed = new();
+
+	/// <summary>
+	/// まとめてDispose
+	/// </summary>
+	private CompositeDisposable? _compositeDisposable;
+
+	/// <summary>
+	/// Dispose済みか
+	/// </summary>
+	public DisposeState DisposeState {
+		get;
+		private set;
+	}
+
+	/// <summary>
+	/// Dispose通知
+	/// </summary>
+	public Observable<Unit> OnDisposed {
+		get {
+			return this._onDisposed.AsObservable();
+		}
+	}
+
+	/// <summary>
+	/// まとめてDispose
+	/// </summary>
+	public CompositeDisposable CompositeDisposable {
+		get {
+			return this._compositeDisposable ??= [];
+		}
+	}
+
+#if DEBUG
+	protected DisposableBase() {
+		this._trackingInfo = new InstanceTrackingInfo(this);
+		var dict = CreatedInstances.GetOrAdd(this.GetType(), _ => new ConcurrentDictionary<InstanceTrackingInfo, byte>());
+		dict.TryAdd(this._trackingInfo, 0);
+	}
+
+	private void RemoveTrackingInfo() {
+		if (this._trackingInfo != null && CreatedInstances.TryGetValue(this.GetType(), out var dict)) {
+			dict.TryRemove(this._trackingInfo, out _);
+		}
+	}
+#endif
+
+	/// <summary>
+	/// Dispose
+	/// </summary>
+	public virtual void Dispose() {
+		this.Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	/// <summary>
+	/// Dispose
+	/// </summary>
+	/// <param name="disposing">マネージドリソースの破棄を行うかどうか</param>
+	protected virtual void Dispose(bool disposing) {
+		lock (this.DisposeLock) {
+			if (this.DisposeState != DisposeState.NotDisposed) {
+				return;
+			}
+			using (this.DisposeLock.DisposableEnterWriteLock()) {
+				if (this.DisposeState != DisposeState.NotDisposed) {
+					return;
+				}
+				this.DisposeState = DisposeState.Disposing;
+			}
+			if (disposing) {
+#if DEBUG
+				this._trackingInfo?.RecordDispose();
+				this.RemoveTrackingInfo();
+#endif
+				this._onDisposed.OnNext(Unit.Default);
+				this._compositeDisposable?.Dispose();
+			}
+			using (this.DisposeLock.DisposableEnterWriteLock()) {
+				this.DisposeState = DisposeState.Disposed;
+			}
+			this.DisposeLock.Dispose();
+		}
+	}
+
+#if DEBUG
+	/// <summary>
+	/// デバッグ用ファイナライザ。Dispose漏れを検出する。
+	/// </summary>
+	~DisposableBase() {
+		this._trackingInfo?.RecordFinalize();
+		this.RemoveTrackingInfo();
+	}
+#endif
+}
+
+#if DEBUG
+/// <summary>
+/// インスタンスの生成、破棄、GCの情報を記録するクラス。
+/// </summary>
+public class InstanceTrackingInfo {
+	private static long _globalEventOrder = 0;
+
+	/// <summary>対象インスタンスへの弱参照</summary>
+	public WeakReference<DisposableBase> Instance {
+		get;
+	}
+
+	public Type Type {
+		get;
+	}
+
+	/// <summary>生成順序</summary>
+	public long CreationOrder {
+		get;
+	}
+
+	/// <summary>生成時刻</summary>
+	public DateTime CreatedAt {
+		get;
+	}
+
+	/// <summary>Dispose順序</summary>
+	public long? DisposeOrder {
+		get; private set;
+	}
+
+	/// <summary>Dispose時刻</summary>
+	public DateTime? DisposedAt {
+		get; private set;
+	}
+
+	/// <summary>ファイナライズ（GC）順序</summary>
+	public long? FinalizeOrder {
+		get; private set;
+	}
+
+	/// <summary>ファイナライズ（GC）時刻</summary>
+	public DateTime? FinalizedAt {
+		get; private set;
+	}
+
+	public string? Status {
+		get;
+		set;
+	}
+
+	public InstanceTrackingInfo(DisposableBase instance) {
+		this.Instance = new WeakReference<DisposableBase>(instance);
+		this.Type = instance.GetType();
+		this.CreatedAt = DateTime.Now;
+		this.CreationOrder = Interlocked.Increment(ref _globalEventOrder);
+		this.Status = null;
+	}
+
+	public void RecordDispose() {
+		this.DisposedAt = DateTime.Now;
+		this.DisposeOrder = Interlocked.Increment(ref _globalEventOrder);
+		this.Status += "Disposed";
+	}
+
+	public void RecordFinalize() {
+		this.FinalizedAt = DateTime.Now;
+		this.FinalizeOrder = Interlocked.Increment(ref _globalEventOrder);
+		this.Status += "Finalized";
+	}
+
+	public override string ToString() {
+		return $"[{this.Type.Name,-32}] {this.Status ?? "Created",-20} [{this.CreationOrder,-10}] {this.CreatedAt:HH:mm:ss.ffff}";
+	}
+}
+#endif

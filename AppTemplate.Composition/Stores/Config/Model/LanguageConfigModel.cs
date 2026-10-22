@@ -1,0 +1,18 @@
+using GenJsonConfig.Attributes;
+
+namespace AppTemplate.Composition.Stores.Config.Model;
+
+/// <summary>
+/// アプリケーションの言語設定モデル
+/// </summary>
+[Inject(InjectServiceLifetime.Singleton)]
+[GenerateJsonConfigDto]
+public class LanguageConfigModel {
+	/// <summary>
+	/// アプリの表示言語タグ (BCP-47)。
+	/// 空文字列の場合はシステムの既定言語を使用します（例: "ja-JP", "en-US"）。
+	/// </summary>
+	public ReactiveProperty<string> Language {
+		get;
+	} = new(string.Empty);
+}
